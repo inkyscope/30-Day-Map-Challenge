@@ -1,0 +1,164 @@
+---
+title: "Volcanoe Eruptions"
+author: "Sung Inkyung"
+date: '2021 2 6'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(maps)
+library(ggridges)
+library(viridis)
+library(patchwork)
+```
+
+```{r}
+volcano <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+
+```
+
+```{r}
+regions <- volcano %>% 
+  select(volcano_number, country, region, subregion, latitude, longitude ) %>%
+  add_count(subregion, name = "occurrences") %>% 
+  arrange(-occurrences) 
+
+df_map <- map_data("world") %>% 
+  as_tibble()
+```
+
+
+```{r}
+plot_world <- df_map %>% 
+  ggplot(aes(long, lat)) +
+  geom_map(map = df_map, 
+           aes(map_id = region), 
+           fill = "#dfd3b9") +
+  geom_point(data = regions,
+             aes(longitude, latitude,
+                 alpha = occurrences,
+                 size = occurrences),
+             color = "#d94f70") +
+  labs(title = "World Volcanos by Number of Occurrences",
+       caption = "Source: Smithsonian Institute | Graphic: Sung Inkyung") +
+  scale_alpha(range = c(.5, .1),
+              guide = "none") +
+  scale_size(range = c(1, 5)) +
+  guides(size = guide_legend(title = "",
+                              title.position = "bottom",
+                              title.hjust = .5,
+                              title.vjust = .5)) +
+  theme_void() +
+  theme(legend.position = c(.55, .075),
+        legend.direction = "horizontal",
+        panel.background = element_rect(fill = "#8ac5d2",
+                                        color = NA),
+        plot.title = element_markdown(size = 16,
+                                      margin = margin(b = 7)),
+        plot.caption = element_text(size = 7,
+                                    color = "#9389a3"))
+```
+
+
+```{r}
+ini_vol <- volcano %>% 
+  filter(country == "Indonesia")
+
+p1 <- ggplot() +
+  geom_density_ridges_gradient(data = ini_vol,
+                               aes(x = elevation,
+                                   y = subregion,
+                                   fill = stat(x))) +
+  scale_fill_viridis_c(option = "magma",
+                       alpha = .7,
+                       direction = 1) +
+  theme_minimal() +
+  theme(legend.position = "none",
+        panel.grid = element_blank(),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank())
+```
+```{r}
+map_ini <- map_data("world", region = "Indonesia")
+
+p2 <- ggplot() +
+  geom_polygon(data = map_ini,
+               aes(long, lat,
+                   group = group),
+               fill = "#bdaf90",
+               alpha = .65) +
+  geom_point(data = ini_vol,
+             aes(longitude, latitude,
+                 color = elevation)) +
+  scale_color_viridis_c(option = "magma",
+                        direction = 1,
+                        guide = "colorbar") +
+  labs(x = "longitude",
+       y = "latitude") +
+  annotate("text",
+           x = 101.2,
+           y = -2.5,
+           label = "Sumatra") +
+  annotate("text",
+           x = 123,
+           y = -9,
+           label = "Lesser Sunda Islands") +
+  annotate("text",
+           x = 113,
+           y = -8.1,
+           label = "Java") +
+  annotate("text",
+           x = 127.4,
+           y = 0.65,
+           label = "Halmahera") +
+  annotate("text",
+           x = 130,
+           y = -6.7,
+           label = "Banda Sea") +
+  annotate("text",
+           x = 105.4,
+           y = -7,
+           label = "Karakatau") +
+  theme_void()+
+  theme(legend.position = "bottom")
+```
+
+```{r}
+ini_vol %>% 
+  group_by(subregion) %>% 
+  slice_max(n = 7, order_by = elevation)
+
+ini_vol %>% 
+  count(last_eruption_year, sort = T) %>% 
+  arrange(last_eruption_year)
+```
+```{r}
+layout <- c(area(.5, .5, 5, 5),
+            area(3, 3, 10, 10))
+```
+
+
+```{r}
+p1 + p2 +
+  plot_layout(design = layout) +
+  plot_annotation(
+    title = "Volcanoes in Indonesia",
+    subtitle = "Elevations of 95 volcanoes acorss 7 subregions in Indonesia\nEach subregion is marked with the highest elevation",
+    caption = "Source: Smithsonian | Graphic: Sung Inkyung"
+  )
+
+ggsave(filename = "volcanoeEruptions_Indonesia.png", width = 21, height = 13, units = "cm")
+```
+
+
+```{r}
+ini_vol %>% 
+  group_by(region) %>% 
+  count(subregion, sort = T)
+```
+
