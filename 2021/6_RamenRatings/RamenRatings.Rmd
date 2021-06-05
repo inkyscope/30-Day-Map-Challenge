@@ -1,0 +1,130 @@
+---
+title: "Ramen Ratings"
+author: "Sung Inkyung"
+date: '2021 6 5'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(maps)
+```
+
+
+```{r}
+ramen_ratings <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-06-04/ramen_ratings.csv")
+```
+
+
+```{r}
+df_ramen <- ramen_ratings %>% 
+  pivot_longer(cols = brand:style,
+               names_to = "category") %>% 
+  mutate(name = country)
+  
+```
+
+#### tile map ----
+#tutorial: https://www.maartenlambrechts.com/2017/10/22/tutorial-a-worldtilegrid-with-ggplot2.html
+```{r}
+
+write.csv(read.csv("https://gist.githubusercontent.com/maartenzam/787498bbc07ae06b637447dbd430ea0a/raw/9a9dafafb44d8990f85243a9c7ca349acd3a0d07/worldtilegrid.csv"), "worldtilegrid.csv")
+
+#load and process tile grid data
+worldtilegrid <- read.csv("https://gist.githubusercontent.com/maartenzam/787498bbc07ae06b637447dbd430ea0a/raw/9a9dafafb44d8990f85243a9c7ca349acd3a0d07/worldtilegrid.csv") 
+
+```
+
+
+```{r}
+df_country <- df_ramen %>% 
+  anti_join(worldtilegrid, by = "name") %>% 
+  count(name, sort = T) %>% 
+  select(name)
+
+world_names <- data.frame(anti_join(worldtilegrid, df_ramen,
+                                    by = "name")) %>% 
+  count(name, sort = T) %>% 
+  select(name)
+```
+
+
+```{r}
+df_ramen <- df_ramen %>% 
+  mutate(name = recode(name,
+                       "United States" = "United States of America",
+                       "Taiwan" = "Taiwan",
+                       "Hong Kong" = "China",
+                       "Vietnam" = "Viet Nam",
+                       "UK" = "Great Britain and Northern Ireland",
+                       "Sarawak" = "Malaysia",
+                       "Holland" = "Netherland",
+                       "Dubai" = "United Arab Emirates",
+                       "Russia" = "Russian Federation",
+                       "Philippines" = "Philippines",
+                       "USA" = "United States of America"))
+
+df <- worldtilegrid %>% 
+  left_join(df_ramen, by = "name") %>% 
+  mutate_all(~replace(., is.na(.), 0)) %>% 
+  group_by(name, category) %>% 
+  mutate(rating = mean(stars),
+         rating = round(rating, 2))
+
+         
+```
+
+```{r}
+plot_tilemap <- df %>% 
+  ggplot(aes(xmin = x, ymin = y,
+             xmax = x + 1, ymax = y + 1,
+             fill = rating)) +
+  geom_rect(color = "gray30",
+            size = .1) +
+  geom_text(aes(x = x, y = y, 
+                label = alpha.2),
+            color = "gray45", 
+            alpha = .7,
+            nudge_x = .55, 
+            nudge_y = -.45,
+            size = 3) +
+  scale_fill_continuous(limits = c(0, 5),
+                        breaks = seq(0, 5, 1),
+                        labels = c(0, 1, 2, 3, 4, 5)) +
+  scale_fill_viridis_c(name = "Average Ratings",
+                       option = "magma", 
+                       na.value = "white", 
+                       breaks = c(0, 1, 2, 3, 4, 5),
+                       guide = guide_colourbar(title.position = "top", 
+                                               title.hjust = .5)) +
+  scale_y_reverse() +
+  labs(title = "Total Average Ratings of Ramen",
+       caption = "Source: #30DayChartChallenge | Graphic: Sung InKyung") +
+  theme_minimal() +
+  theme(legend.direction = "horizontal",
+        legend.key.width = unit(2, "lines"),
+        legend.key.size = unit(.4, "cm"),
+        legend.position = c(.2, .05),
+        legend.text = element_text(size = 7,
+                                   color = "#f7f5f5"),
+        legend.title = element_text(size = 9,
+                                    color = "#f7f7f5"),
+        plot.background = element_rect(fill = "gray65"),
+        plot.title = element_text(size = 20,
+                                  color = "#f7f5f5", 
+                                  face = "bold"),
+        plot.caption = element_text(size = 7,
+                                    color = "#f7f5f5"),
+        panel.grid = element_blank(), 
+        axis.text = element_blank(), 
+        axis.title = element_blank())
+
+ggsave(here::here("2021", "6_RamenRatings", "RamenRatings.png"), dpi = 300, width = 30, height = 17, units = "cm")
+        
+
+```
+
