@@ -1,5 +1,4 @@
-# mapscope
-2021 challenge
+### [2021 30 Day Map Challenge](https://github.com/tjukanovt/30DayMapChallenge)
 
 
 ### 6. Tile Map | Ramen Ratings
