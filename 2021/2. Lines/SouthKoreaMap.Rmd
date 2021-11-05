@@ -34,8 +34,8 @@ p1 <- kor_province %>%
   ggplot(aes(long, lat,
              group = group, 
              color = id),
-         size = 1.5) +
-  geom_polygon(fill = "#c1b398") +
+         size = 0.3) +
+  geom_polygon(fill = "#d9c8ae") +
   scale_color_manual(values = tol17rainbow) +
   theme_void()+
   theme(legend.position = "none")
@@ -48,7 +48,8 @@ p2 <- kor_sigungu %>%
   ggplot(aes(long, lat, 
              group = group, 
              color = id)) +
-  geom_polygon(fill = "#c1b398") +
+  geom_polygon(fill = "#c1b398",
+         size = 0.2) +
   theme_void() +
   theme(legend.position = "none")
 ```
@@ -60,7 +61,8 @@ p3 <- kor_emd %>%
   ggplot(aes(long, lat, 
              group = group, 
              color = id)) +
-  geom_polygon(fill = "#c1b398") +
+  geom_polygon(fill = "#d9c8ae",
+         size = 0.1) +
   theme_void() +
   theme(legend.position = "none")
 ```
@@ -74,7 +76,8 @@ p4 <- kor_li %>%
   ggplot(aes(long, lat, 
              group = group, 
              color = id)) +
-  geom_polygon(fill = "#c1b398") +
+  geom_polygon(fill = "#d9c8ae",
+         size = 0.07) +
   theme_void() +
   theme(legend.position = "none")
 
@@ -89,10 +92,10 @@ map_korea + plot_annotation(
 ) &
   theme(plot.background = element_rect(fill = "#b1dede",
                                        color = NA),
-        plot.title = element_text(size = 18,
+        plot.title = element_text(size = 14,
                                   hjust = 0.5,
                                   margin = margin(t = 10, b = 15)),
-        plot.caption = element_text(size = 7,
+        plot.caption = element_text(size = 6,
                                     hjust = 0.5,
                                     margin = margin(t = 20, b = 5)))
 
