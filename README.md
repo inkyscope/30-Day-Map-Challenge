@@ -2,14 +2,9 @@
 ![30 DMC](https://github.com/inkyscope/mapscope/blob/main/data/30dmpc_2021.png)
 
 
-### 6. Tile Map | Ramen Ratings
-![Ramen Ratings](https://github.com/inkyscope/mapscope/blob/main/2021/6_RamenRatings/RamenRatings.png)
+### 3. Polygon | Ramen Ratings
+![Ramen Ratings](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/3.%20Polygons/RamenRatings.png)
 
-### 3. USA Map | Dubois Challenge
-![DuboisChallenge](https://github.com/inkyscope/mapscope/blob/main/2021/3_duboischallenge/relativepopulationofblacks.png)
+### 1. Point | Volcanoes in Indonesia
+![Volcanoes](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/1.%20Points/VolcanoeEruptions_Indonesia.png)
 
-### 2. Indonesia Map | Volcanoes
-![Volcanoes](https://github.com/inkyscope/mapscope/blob/main/2021/2_volcanos/VolcanoeEruptions_Indonesia.png)
-
-### 1. World Map | Rail Transit Cost
-![Rail Transit Cost](https://github.com/inkyscope/mapscope/blob/main/2021/1_transitcost/Transitcost.png)
