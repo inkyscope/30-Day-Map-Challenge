@@ -1,0 +1,101 @@
+---
+title: "Untitled"
+author: "Sung Inkyung"
+date: '2021 11 1'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rgdal)
+library(tidyverse)
+library(patchwork)
+
+```
+
+### Source[Korea Map by GIS Developer] (http://www.gisdeveloper.co.kr/?p=2332)
+
+```{r}
+
+kor_province <- readOGR("C:/Users/inkyscope/Documents/projectR/mapscope/data/GIS_korea/CTPRVN_202101/TL_SCCO_CTPRVN.shp")
+
+class(kor_province)
+slotNames(kor_province)
+
+
+tol17rainbow = c("#771155", "#AA4488", "#CC99BB", "#114477", "#4477AA", "#77AADD", "#117777", "#44AAAA", "#77CCCC", "#117744", "#44AA77", "#88CCAA", "#777711", "#AAAA44", "#DDDD77", "#774411", "#AA7744")
+
+
+p1 <- kor_province %>% 
+  fortify() %>% 
+  ggplot(aes(long, lat,
+             group = group, 
+             color = id),
+         size = 1.5) +
+  geom_polygon(fill = "#c1b398") +
+  scale_color_manual(values = tol17rainbow) +
+  theme_void()+
+  theme(legend.position = "none")
+```
+```{r}
+kor_sigungu <- readOGR("C:/Users/inkyscope/Documents/projectR/mapscope/data/GIS_korea/SIG_202101/TL_SCCO_SIG.shp")
+
+p2 <- kor_sigungu %>% 
+  fortify() %>% 
+  ggplot(aes(long, lat, 
+             group = group, 
+             color = id)) +
+  geom_polygon(fill = "#c1b398") +
+  theme_void() +
+  theme(legend.position = "none")
+```
+```{r}
+kor_emd <- readOGR("C:/Users/inkyscope/Documents/projectR/mapscope/data/GIS_korea/EMD_202101/TL_SCCO_EMD.shp")
+
+p3 <- kor_emd %>% 
+  fortify() %>% 
+  ggplot(aes(long, lat, 
+             group = group, 
+             color = id)) +
+  geom_polygon(fill = "#c1b398") +
+  theme_void() +
+  theme(legend.position = "none")
+```
+
+
+```{r}
+kor_li <- readOGR("C:/Users/inkyscope/Documents/projectR/mapscope/data/GIS_korea/LI_202101/TL_SCCO_LI.shp")
+
+p4 <- kor_li %>% 
+  fortify() %>% 
+  ggplot(aes(long, lat, 
+             group = group, 
+             color = id)) +
+  geom_polygon(fill = "#c1b398") +
+  theme_void() +
+  theme(legend.position = "none")
+
+```
+
+```{r}
+map_korea <- p1 + p2 + p3
+
+map_korea + plot_annotation(
+  title = "South Korea with Provinces, Cities and Towns",
+  caption = "Source: GIS Developer | Graphic: Sung Inkyung"
+) &
+  theme(plot.background = element_rect(fill = "#b1dede",
+                                       color = NA),
+        plot.title = element_text(size = 18,
+                                  hjust = 0.5,
+                                  margin = margin(t = 10, b = 15)),
+        plot.caption = element_text(size = 7,
+                                    hjust = 0.5,
+                                    margin = margin(t = 20, b = 5)))
+
+ggsave(here::here("2021", "2. Lines", "SouthKoreaMap.png"), width = 18, height = 10, units = "cm")
+```
+
