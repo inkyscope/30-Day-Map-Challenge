@@ -1,5 +1,5 @@
 ---
-title: "Ramen Ratings"
+title: "3. Polygons"
 author: "Sung Inkyung"
 date: '2021 6 5'
 output: html_document
@@ -123,7 +123,7 @@ plot_tilemap <- df %>%
         axis.text = element_blank(), 
         axis.title = element_blank())
 
-ggsave(here::here("2021", "6_RamenRatings", "RamenRatings.png"), dpi = 300, width = 30, height = 17, units = "cm")
+ggsave(here::here("2021", "3. Polygons", "RamenRatings.png"), dpi = 300, width = 30, height = 17, units = "cm")
         
 
 ```
