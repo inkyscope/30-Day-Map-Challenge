@@ -1,0 +1,51 @@
+---
+title: "7.Green"
+author: "Sung Inkyung"
+date: '2021 11 7'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(ggmap)
+```
+
+
+```{r}
+starbucks <- read_xlsx("C:/Users/inkyscope/Documents/projectR/mapscope/data/coffee_chains.xlsx")
+
+map_world <- map_data("world")
+```
+
+```{r}
+map_starbucks <- map_world %>% 
+  ggplot() +
+  geom_polygon(data = map_world,
+               aes(long, lat, group = group),
+               fill = "#eac784",
+               color = "#604c4c") +
+  geom_point(data = starbucks,
+             aes(Longitude, Latitude),
+                 color = "#0b421a",
+                 alpha = 0.02) +
+  labs(title = "Starbucks in the World",
+       caption = "Source: floatingdata.com | Graphic: Sung Inkyung") +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "#362415",
+                                       color = NA),
+        plot.title = element_text(size = 20,
+                                  color = "#fffcfc",
+                                  hjust = 0.5,
+                                  margin = margin(t = 10, b = 15)),
+        plot.caption = element_text(size = 7,
+                                    color = "#fffcfc",
+                                    hjust = 0.5,
+                                    margin = margin(b = 10)))
+
+ggsave(here::here("2021", "7. Green", "Starbucks.png"), width = 20, height = 14, units = "cm")
+```
