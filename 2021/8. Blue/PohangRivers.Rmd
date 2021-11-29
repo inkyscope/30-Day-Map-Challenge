@@ -1,0 +1,117 @@
+---
+title: "8.blue"
+author: "Sung Inkyung"
+date: '2021 11 7'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Source[streetmap by Christian Burkhart] (https://ggplot2tutor.com/tutorials/streetmaps)
+### Source[Open street Map data by Dilinie Seimon] (https://rspatialdata.github.io/osm.html#Visualising_queried_data_with_ggplot2_and_ggmap)
+```{r}
+library(tidyverse)
+library(osmdata)
+library(ggmap)
+library(patchwork)
+```
+
+```{r}
+pohang_bb <- getbb("Pohang Korea")
+```
+
+
+```{r}
+streets <- getbb("Pohang Korea") %>% 
+  opq() %>% 
+  add_osm_feature(key = "highway",
+                  value = c("motorway", "primay", "secondary", "tertiary")) %>% 
+  osmdata_sf()
+
+small_streets <- getbb("Pohang Korea") %>% 
+  opq() %>% 
+  add_osm_feature(key = "highway",
+                  value = c("residential", "living_street",
+                            "unclassified", "service", "footway")) %>% 
+  osmdata_sf()
+
+river <- getbb("Pohang Korea") %>% 
+  opq() %>% 
+  add_osm_feature(key = "waterway",
+                  value = "river") %>% 
+  osmdata_sf()
+```
+
+```{r}
+p1 <- ggplot() +
+  geom_sf(data = streets$osm_lines,
+          inherit.aes = FALSE,
+          color = "#ffbe7f",
+          size = 0.4,
+          alpha = 0.8) +
+  geom_sf(data = small_streets$osm_lines,
+          inherit.aes = FALSE,
+          color = "#ffbe7f",
+          size = 0.4,
+          alpha = 0.6) +
+  geom_sf(data = river$osm_lines,
+          inherit.aes = FALSE,
+          color = "#7fc0ff",
+          size = 3,
+          alpha = 0.3) +
+  coord_sf(xlim = c(129.00, 129.62),
+           ylim = c(35.86, 36.36),
+           expand = FALSE) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "#282828"))
+  
+```
+
+```{r}
+pohang <- get_map(pohang_bb, 
+                      maptype = "roadmap")
+
+p2 <- ggmap(pohang) +
+  geom_sf(data = streets$osm_lines,
+          inherit.aes = FALSE,
+          color = "#ffbe7f",
+          size = 0.4,
+          alpha = 0.8) +
+  geom_sf(data = small_streets$osm_lines,
+          inherit.aes = FALSE,
+          color = "#ffbe7f",
+          size = 0.4,
+          alpha = 0.6) +
+  geom_sf(data = river$osm_lines,
+          inherit.aes = FALSE,
+          color = "#7fc0ff",
+          size = 3,
+          alpha = 0.3) +
+  coord_sf(expand = FALSE) +
+  theme_void()
+```
+
+```{r}
+map_pohang <- p1 + p2
+
+map_pohang +
+  plot_annotation(
+  labs(title = "Rivers in Pohang (South Korea)",
+       caption = "Graphic: Sung Inkyung")) &
+  theme(plot.background = element_rect(fill = "#282828",
+                                       color = NA),
+        panel.background = element_rect(fill = "#282828",
+                                       color = NA),
+        plot.title = element_text(size = 16,
+                                  hjust = 0.5,
+                                  color = "#7fc0ff",
+                                  margin = margin(t = 10, b = 15)),
+        plot.caption = element_text(size = 7,
+                                    hjust = 0.5,
+                                    color = "gary60",
+                                    margin = margin(t = 20, b = 5)))
+
+ggsave(here::here("2021", "8.Blue", "PohangRivers.png"), width = 20, height = 16, units = "cm")
+```

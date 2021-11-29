@@ -1,0 +1,96 @@
+---
+title: "Asia Happiness"
+author: "Sung Inkyung"
+date: '2021 5 1'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Source[30DayChartChallenge by Jake Kaupp] (https://github.com/jkaupp/30DayChartChallenge/blob/master/day30/R/day30.R)
+```{r}
+library(tidyverse)
+library(rnaturalearth)
+library(sf)
+library(here)
+library(readxl)
+library(biscale)
+library(ggtext)
+library(glue)
+library(cowplot)
+library(janitor)
+
+```
+
+
+```{r}
+happiness <- read_excel("C:/Users/inkyscope/Documents/projectR/mapscope/2021/4. Hexagon/data/WHR20_DataForTable2.1.xls") %>% 
+  clean_names() %>% 
+  select(year, country_name, life_ladder, sd_mean = standard_deviation_of_ladder_by_country_year)
+
+asia <- ne_countries(scale = "medium",
+                     type = "map_units",
+                     returnclass = "sf",
+                     continent = "Asia") 
+
+
+asia_happy <- left_join(asia, happiness, 
+                        by = c("sovereignt" = "country_name"))
+
+df <- asia_happy %>% 
+  group_split(year) %>% 
+  .[-16] %>% 
+  map_dfr(~bi_class(.x, x = life_ladder, 
+          y = sd_mean, style = "quantile",
+          dim = 3)) %>% 
+  filter(year %in% 2007:2019) %>% 
+  filter(subregion != "Western Asia")
+
+
+legend <- bi_legend(pal = "DkBlue",
+                    dim = 3, 
+                    xlab = "Higher Happiness",
+                    ylab = "Higher Uncertainty",
+                    size = 8) +
+  theme(plot.background = element_rect(fill = "#edf4ef",
+                                       color = NA),
+        panel.background = element_rect(fill = "#edf4ef",
+                                        color = NA))
+```
+
+
+```{r}
+map <- ggplot(df) +
+  geom_sf(data = asia, fill = "gray88",
+          alpha = .5, color = "white") +
+  geom_sf(mapping = aes(fill = bi_class), 
+          show.legend = F, 
+          color = "gray88",
+          size = .1) +
+  bi_scale_fill(pal = "DkBlue", dim = 3) +
+  labs(x = "",
+       y = "Happiness in Asia") +
+  facet_wrap(~year, nrow = 2) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "#edf4ef",
+                                       color = NA),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_textbox_simple(width = unit("5", "cm"), 
+                                              vjust = 1,
+                                              size = 15),
+        strip.text = element_text(size = 18,
+                                  color = "#034947"))
+
+plot <- ggdraw(map) +
+  draw_plot(legend, x = -0.04, y = .36, 
+            width = .2, 
+            height = .2)
+
+ggsave(here::here("2021", "12.Population", "AsiaHappiness.png"), width = 32, height = 18, units = "cm")
+
+```
+
+
+
