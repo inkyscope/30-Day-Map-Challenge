@@ -1,0 +1,121 @@
+---
+title: "4. Hexagons"
+author: "Sung Inkyung"
+date: '2021 12 1'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(broom)
+library(geojson)
+library(geojsonio)
+library(rgdal)
+library(rgeos)
+library(patchwork)
+```
+
+
+```{r}
+pumpkins <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-10-19/pumpkins.csv')
+
+```
+
+```{r}
+df_pumpkins <- pumpkins %>% 
+  separate(id, into = c("year", "type"), sep = "-") %>% 
+  mutate(across(c(year, place, weight_lbs, ott), parse_number)) %>% 
+  filter(type == "P",
+         country == "United States") %>% 
+  select(year, place, weight_lbs, ott, state = state_prov) %>% 
+  mutate_at(vars(year:state), ~replace_na(., 0)) %>% 
+  group_by(year, state) %>% 
+  filter(year == 2020) %>% 
+  mutate(avg = round(mean(ott),1))
+
+```
+
+```{r}
+df_states <- read_csv(here::here("data", "50_us_states_all_data.csv"), col_names = F) %>% 
+  select(state = "X2",
+         ISO2 = "X3")
+
+## Download the Hexagones boundaries at geojson format here: https://team.carto.com/u/andrew/tables/andrew.us_states_hexgrid/public/map.
+
+
+map_hex <- geojson_read(here::here("data", "us_states_hexgrid.geojson"),  what = "sp")
+
+map_hex@data <-
+  map_hex@data %>%
+  mutate(google_name = gsub(" \\(United States\\)", "", google_name))
+
+## fortify
+map_hex_fortified <- tidy(map_hex, region = "google_name")
+
+## centroids for labels
+centroids <- cbind.data.frame(data.frame(gCentroid(map_hex, byid = T), id = map_hex@data$iso3166_2))
+
+## combine data
+df_pumpkins_hex <- map_hex_fortified %>% 
+  left_join(df_states, by = c("id" = "state")) %>% 
+  left_join(df_pumpkins, by = c("id" = "state")) 
+
+```
+
+
+```{r}
+plot_map <- df_pumpkins_hex %>% 
+  filter(year == 2020) %>% 
+  ggplot() +
+  geom_polygon(aes(long, lat,
+                   group = group,
+                   fill = avg),
+               color = "#b5651d") +
+  geom_text(data = centroids,
+            aes(x = x, y = y, 
+                label = id),
+            fontface = "bold") +
+  rcartocolor::scale_fill_carto_c(palette = "OrYel",
+                                  name = "US Giant Pumpkins OTT Average",
+                                  limits = c(100, 500),
+                                  na.value = "gray85") +
+  coord_map() +
+  labs(title = "Average of US Giant Pumpkins OTT(over the top) 2013-2020",
+       caption = "Source: BigPumpkins.com | Graphic: Sung Inkyung") +
+  guides(fill = guide_colorbar(barheight = unit(2.5, units = "mm"),
+                               barwidth = unit(90, units = "mm"),
+                               direction = "horizontal",
+                               ticks.colour = "gray10",
+                               title.position = "top",
+                               title.hjust = 0.5)) +
+  theme(legend.position = c(0.48, 0.92),
+        legend.title = element_text(size = 12, 
+                                    color = "grey45"),
+        legend.text = element_text(color = "grey45", 
+                                        size = 11),
+        legend.background = element_rect(fill = "#f9eed9"),
+        plot.background = element_rect(fill = "grey10"),
+        panel.background = element_rect(fill = "#f9eed9"),
+        panel.border = element_blank(),
+        plot.title = element_text(size = 25,
+                                  hjust = 0.5,
+                                  color = "#e26238",
+                                  margin = margin(t = 15, b = 40)),
+        plot.caption = element_text(size = 12, 
+                                    color = "grey45",
+                                    hjust = 0.5,
+                                    margin = margin(t = 30, b = 10)),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        axis.title = element_blank(),
+        panel.grid.major = element_blank())
+
+ggsave(here::here("2021", "4. Hexagons", "GiantPumpkins.png"), width = 32, height = 24, units = "cm")
+  
+```
+
+
