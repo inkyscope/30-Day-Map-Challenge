@@ -26,17 +26,16 @@ pumpkins <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/t
 ```
 
 ```{r}
-df_pumpkins <- pumpkins %>% 
+df_watermelons <- pumpkins %>% 
   separate(id, into = c("year", "type"), sep = "-") %>% 
+  filter(place != c("EXH", "DMG")) %>% 
   mutate(across(c(year, place, weight_lbs, ott), parse_number)) %>% 
-  filter(type == "P",
+  filter(type == "W",
          country == "United States") %>% 
-  select(year, place, weight_lbs, ott, state = state_prov) %>% 
+  select(year, weight_lbs, ott, state = state_prov) %>% 
   mutate_at(vars(year:state), ~replace_na(., 0)) %>% 
   group_by(year, state) %>% 
-  filter(year == 2020) %>% 
-  mutate(avg = round(mean(ott),1))
-
+  mutate(med = round(median(ott),1))
 ```
 
 ```{r}
@@ -60,30 +59,28 @@ map_hex_fortified <- tidy(map_hex, region = "google_name")
 centroids <- cbind.data.frame(data.frame(gCentroid(map_hex, byid = T), id = map_hex@data$iso3166_2))
 
 ## combine data
-df_pumpkins_hex <- map_hex_fortified %>% 
+df_watermelons_hex <- map_hex_fortified %>% 
   left_join(df_states, by = c("id" = "state")) %>% 
-  left_join(df_pumpkins, by = c("id" = "state")) 
-
+  left_join(df_watermelons, by = c("id" = "state")) 
 ```
 
 ```{r}
-plot_map <- df_pumpkins_hex %>% 
-  filter(year == 2020) %>% 
+plot_map <- df_watermelons_hex %>% 
   ggplot() +
   geom_polygon(aes(long, lat,
                    group = group,
-                   fill = avg),
-               color = "#b5651d") +
+                   fill = med),
+               color = "#e5f5f9") +
   geom_text(data = centroids,
             aes(x = x, y = y, 
                 label = id),
             fontface = "bold") +
-  rcartocolor::scale_fill_carto_c(palette = "OrYel",
-                                  name = "US Giant Pumpkins OTT Average",
-                                  limits = c(100, 500),
+  rcartocolor::scale_fill_carto_c(palette = "BuGn",
+                                  name = "US Watermelon OTT Average",
+                                  limits = c(50, 250),
                                   na.value = "gray85") +
   coord_map() +
-  labs(title = "Average of US Giant Pumpkins OTT(over the top) 2013-2020",
+  labs(title = "Average of US Watermelon OTT(over the top) 2013-2020",
        caption = "Source: BigPumpkins.com | Graphic: Sung Inkyung") +
   guides(fill = guide_colorbar(barheight = unit(2.5, units = "mm"),
                                barwidth = unit(90, units = "mm"),
@@ -102,7 +99,7 @@ plot_map <- df_pumpkins_hex %>%
         panel.border = element_blank(),
         plot.title = element_text(size = 25,
                                   hjust = 0.5,
-                                  color = "#e26238",
+                                  color = "#2ca25f",
                                   margin = margin(t = 15, b = 40)),
         plot.caption = element_text(size = 12, 
                                     color = "grey45",
@@ -113,8 +110,7 @@ plot_map <- df_pumpkins_hex %>%
         axis.title = element_blank(),
         panel.grid.major = element_blank())
 
-ggsave(here::here("2021", "4. Hexagons", "GiantPumpkins.png"), width = 32, height = 24, units = "cm")
-  
-```
+ggsave(here::here("2021", "4. Hexagons", "Watermelon.png"), width = 32, height = 24, units = "cm")
 
+```
 
