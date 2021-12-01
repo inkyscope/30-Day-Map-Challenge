@@ -66,7 +66,6 @@ df_pumpkins_hex <- map_hex_fortified %>%
 
 ```
 
-
 ```{r}
 plot_map <- df_pumpkins_hex %>% 
   filter(year == 2020) %>% 
