@@ -76,11 +76,11 @@ plot_map <- df_watermelons_hex %>%
                 label = id),
             fontface = "bold") +
   rcartocolor::scale_fill_carto_c(palette = "BuGn",
-                                  name = "US Watermelon OTT Average",
+                                  name = "US Watermelon Median OTT",
                                   limits = c(50, 250),
                                   na.value = "gray85") +
   coord_map() +
-  labs(title = "Average of US Watermelon OTT(over the top) 2013-2020",
+  labs(title = "Median of US Watermelon OTT(over the top) 2013-2020",
        caption = "Source: BigPumpkins.com | Graphic: Sung Inkyung") +
   guides(fill = guide_colorbar(barheight = unit(2.5, units = "mm"),
                                barwidth = unit(90, units = "mm"),
