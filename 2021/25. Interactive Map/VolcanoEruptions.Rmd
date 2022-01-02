@@ -1,0 +1,72 @@
+---
+title: "Untitled"
+author: "Sung Inkyung"
+date: '2022 1 2'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(gganimate)
+library(ggtext)
+library(showtext)
+
+font_add_google("Lato", "lato")
+showtext_opts(dpi = 92)
+showtext_auto(enable = TRUE)
+
+theme_set(theme_minimal(base_family = "lato"))
+
+
+eruptions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+
+
+df <-eruptions %>% 
+  filter(eruption_category == "Confirmed Eruption",
+         start_year >= 1900,
+         !is.na(vei)) 
+
+plot <- df %>% 
+  ggplot(aes(longitude, latitude, size = vei, group = start_year)) +
+  borders(color = "#c6c1b9", fill = "#d6ecef") +
+  geom_point(color = "#c22c4e",
+             shape = 19,
+             alpha = 0.3) +
+  scale_radius(range = c(0.1, 9)) +
+  transition_time(start_year, 
+                  range = c(1899, 2020)) +
+  labs(title = "The Past 120 Years of <span style = 'color:#c22c4e'>**VOLCANO ERUPTIONS**</span>",
+       subtitle = "**Year**: {pmax(round(frame_time, 0), 1900)}",
+       caption = "Source: Smithsonian | Graphic: Sung Inkyung") +
+  enter_grow() +
+  shadow_wake(wake_length = 0.1, alpha = F) +
+  ggthemes::theme_map() +
+  theme(
+    legend.position = "none",
+    plot.title = element_markdown(family = "lato",
+                              size = 24,
+                              margin = margin(b = 7)),
+    plot.subtitle = element_markdown(family = "lato",
+                                     size = 20,
+                                     margin = margin(b = 15)),
+    plot.caption = element_text(family = "lato",
+                                size = 9,
+                                margin = margin(t = 20)),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+                                
+
+anim <- animate(plot, fps = 10, nframes = 10 * 30,
+                start_pause = 10, 
+                end_pause = 15, 
+                width = 800,
+                height = 600)
+
+#anim_save("volcanoEruptions.gif", anim)
+
+```

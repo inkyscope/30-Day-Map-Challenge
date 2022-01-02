@@ -1,0 +1,65 @@
+---
+title: "13.Data Challenge 2: Natural Earth"
+author: "Sung Inkyung"
+date: '2021 11 5'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(rnaturalearth)
+library(sf)
+library(janitor)
+```
+
+
+```{r}
+happiness <- here::here("C:/Users/inkyscope/Documents/projectR/mapscope/data/WHR20_DataForTable2.1.xls") %>% 
+  read_excel() %>% 
+  clean_names() %>% 
+  select(year, country_name, life_ladder, 
+         sd_mean = standard_deviation_of_ladder_by_country_year)
+
+world <- map_data("world")
+korea_map <- ne_countries(scale = "medium",
+                          returnclass = "sf") %>% 
+  filter(sovereignt == "South Korea")
+  
+
+korea_happy <- left_join(korea_map, happiness, 
+                        by = c("sovereignt" = "country_name")) %>% 
+  group_by(year) %>% 
+  mutate(life = mean(life_ladder))
+
+p <- korea_happy %>% 
+  ggplot() +
+  geom_sf(aes(fill = life)) +
+  scale_fill_gradient(low = "#79cdcd", high = "#da3287") +
+  facet_wrap(~ year,
+             nrow = 1) +
+  coord_sf() +
+  labs(title = "Happiness in South Korea",
+       #subtitle = "Yearly average of life ladder score from 10(best) to 0(worst)",
+       caption = "Source: World Happiness Report | Graphic: Sung Inkyung") +
+  guides(fill = guide_legend(title = "Life Ladder")) +
+  theme_void() +
+  theme(
+    legend.position = "bottom",
+    legend.key.height = unit(0.8, "lines"),
+    plot.background = element_rect(fill = "#FFF8E7", color = NA),
+    plot.title = element_text(size = 30,
+                              hjust = 0.5, 
+                              face = "bold"),
+    plot.subtitle = element_text(size = 14, 
+                                 hjust = 0.5),
+    plot.caption = element_text(size = 11, 
+                                 hjust = 0.5, 
+                                 margin = margin(t = 20, b = 10)))
+
+ggsave(here::here("2021", "13.Data Challenge 2_Natural Earth", "Data Challenge 2_Natural Earth.png"), width = 30, height = 8, units = "cm")
+```
