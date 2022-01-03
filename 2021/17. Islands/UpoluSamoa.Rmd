@@ -1,0 +1,92 @@
+---
+title: "5. Open Street Map"
+author: "Sung Inkyung"
+date: '2022 1 3'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(osmdata)
+library(ragg)
+theme_set(theme_minimal())
+```
+
+
+```{r}
+summary <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-01/summary.csv')
+```
+
+
+```{r}
+df_fiji <- summary %>% 
+  group_by(country, location) %>% 
+  summarise(freq = n()) %>% 
+  arrange(desc(freq))
+```
+```{r}
+getbb("Upolu Samoa")
+```
+
+
+```{r}
+streets <- getbb("Upolu Samoa") %>% 
+  opq()%>%
+  add_osm_feature(key = "highway", 
+                  value = c("motorway", "primary", 
+                            "secondary", "tertiary")) %>%
+  osmdata_sf()
+streets
+
+small_streets <- getbb("Upolu Samoa") %>% 
+  opq() %>% 
+  add_osm_feature(key = "highway",
+                  value = c("residential", "living_street", "serviced", "fottway")) %>% 
+  osmdata_sf()
+
+river <- getbb("Upolu Samoa") %>% 
+  opq() %>% 
+  add_osm_feature(key = "waterway",
+                  value = "river") %>% 
+  osmdata_sf()
+
+ggplot() +
+  geom_sf(data = streets$osm_lines,
+          inherit.aes = F,
+          color = "#01e1ec",
+          size = 0.4, 
+          alpha = 0.8) +
+  geom_sf(data = small_streets$osm_lines,
+          inherit.aes = F,
+          color = "#ffc000",
+          size = 0.4,
+          alpha = 0.6) +
+  geom_sf(data = river$osm_lines,
+          inherit.aes = F,
+          color = "#ffc000",
+          size = 0.2, 
+          alpha = 0.5) +
+  coord_sf(xlim = c(-172.10, -171.40),
+           ylim = c(-14.10, -13.75),
+           expand = F) +
+  annotate(
+    "text", x = -171.58, y = -13.80,
+    label = "UPOLU, SAMOA",
+    color = "#8fbc8f",
+    size = 5, fontface = "bold"
+    ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "#362d17",
+                                   color = NA),
+    panel.background = element_rect(fill = "#362d17",
+                                   color = "#eeeed1"),
+    plot.margin = margin(10, 10, 10, 10)
+  )
+
+ggsave("UpoluSamoa.png", width = 12, height = 6, units = "cm", dpi = 300)
+```
