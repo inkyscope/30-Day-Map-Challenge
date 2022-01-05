@@ -1,0 +1,103 @@
+---
+title: "Untitled"
+author: "Sung Inkyung"
+date: '2022 1 5 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Source[maps with ggplot2 by Random Forest] (http://randomforest.run/posts/ggplot-maps/#delaunay-triangulation)
+```{r}
+library(tidyverse)
+library(MetBrewer)
+library(maps)
+library(ggmap)
+library(showtext)
+
+font_add_google(c("Anton"))
+
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
+
+theme_set(theme_minimal())
+```
+
+
+```{r}
+summary <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-01/summary.csv')
+
+df_country <- summary %>% 
+  group_by(country) %>% 
+  summarise(freq = n()) %>% 
+  arrange(-freq)
+
+df_viewers <- summary %>% 
+  group_by(country) %>% 
+  filter(!is.na(viewers_mean)) %>% 
+  summarise(avg = mean(viewers_mean),
+            avg = round(avg, 2)) %>% 
+  arrange(-avg)
+
+ df_survivor <- df_country %>% 
+  left_join(df_viewers) %>% 
+   arrange(-avg)
+ 
+ world <- map_data('world') %>%
+  rename(country = region) 
+ 
+ map_data <- inner_join(df_survivor, world)
+ 
+```
+
+
+```{r polygon map}
+map_polyon <- ggplot() +
+  borders("world", xlim = c(-180, 180), 
+          ylim = c(-90, 83.6), size = 0.05, 
+          fill = "black") +
+  geom_polygon(data = map_data,
+               color = "white",
+               aes(long, lat, group = group,
+                   fill = avg)) +
+  scale_fill_gradientn(colors = met.brewer("Manet"),
+                       guide = guide_legend(
+                         trans = "log1p",
+                         breaks = seq(5, 30, 5))) +
+  guides(fill = guide_colorbar(
+    title = "Average of viewers",
+    title.position = "top",
+    barwidth = 7,
+    barheight = .3)) +
+  labs(title = "Countries filmed in Survivor TV Shows",
+       subtitle = "Australia, Malaysia, Thaliland, Polynesia, Kenya,\nPanama, Vanuatu, Guatemala, Palau, Brazil",
+       caption = "Source: survivor package | Graphic: Sung Inkyung") +
+  coord_map("gilbert",
+            xlim = c(-180, 180),
+            ylim = c(-90, 83.6)) +
+  theme_void() +
+  theme(legend.position = "bottom",
+        legend.background = element_rect(fill = "gray97",
+                                   color = NA),
+        legend.direction = "horizontal",
+        legend.title = element_text(size = 7),
+        legend.title.align = 0.5,
+        plot.background = element_rect(fill = "gray97",
+                                       color = NA),
+        panel.background = element_rect(fill = "gray97",
+                                       color = NA),
+        plot.title = element_text(size = 18, 
+                                  family = "Anton",
+                                  hjust = 0.5, 
+                                  margin = margin(b = 5)),
+        plot.subtitle = element_text(size = 12,
+                                  hjust = 0.5, 
+                                  margin = margin(b = 10)),
+        plot.caption = element_text(size = 9,
+                                  hjust = 0.5, 
+                                  margin = margin(t = 15)),
+        plot.margin = margin(10, 10, 10, 10))
+               
+ggsave("SurvivorTVShow.png")
+```
