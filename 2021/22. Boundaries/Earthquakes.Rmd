@@ -1,0 +1,73 @@
+---
+title: "22. Boundaries"
+author: "Sung Inkyung"
+date: '2022 1 6'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Source[30DayMapChallenge by @geokaramanis](https://github.com/gkaramanis/30DayMapChallenge/blob/main/2021/22-boundaries/22-boundaries-tectonic.R)
+
+```{r}
+library(tidyverse)
+library(sf)
+library(rnaturalearth)
+library(showtext)
+
+font_add_google(c("Lato"))
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
+```
+
+
+```{r}
+ind <- ne_countries(scale = "medium", returnclass = "sf") %>% 
+  filter(name == "Indonesia")
+
+#World tectonic plates and boundaries by Hugo Ahlenius https://github.com/fraxen/tectonicplates
+
+plates <- read_sf("data/fraxen tectonicplates master GeoJSON/PB2002_boundaries.json")
+
+#https://data.humdata.org/dataset/catalog-of-earthquakes1970-2014/resource/10ac8776-5141-494b-b3cd-bf7764b2f964
+earthquakes <- read.csv("data/earthquakes1970-2014.csv") %>% 
+  janitor::clean_names() %>% 
+  filter(longitude >= 95.20664,
+         longitude <= 140.9762,
+         latitude >= -10.90967,
+         latitude <= 5.907031
+         )
+
+ggplot() +
+  geom_sf(data = ind, fill = "#dba879", color = NA) +
+  geom_sf(data = plates, color = "#2c7083", size = 1, linetype = 4) +
+  geom_point(data = earthquakes, 
+             aes(longitude, latitude, size = magnitude),
+             color = "#413d3c", shape = 21, fill = "#910a60", stroke = 1, alpha = 0.7) + 
+  scale_size_continuous(range = c(0, 6)) +
+  coord_sf(xlim = c(95.5, 141),
+           ylim = c(-11, 6)) +
+  labs(title = "Tectonic Plate Boundaries and Earthquakes in Indonesia",
+       subtitle = "1970 - 2014",
+       caption = "Source: World tectonic plates and boundaries by Hugo Ahlenius\nGlobal catalog of earthquakes\nGraphic: Sung Inkyung") +
+  theme_void() +
+  theme(legend.position = "none",
+        plot.background = element_rect(fill = "#40e0d0",
+                                       color = NA),
+        plot.title = element_text(size = 24, 
+                                  family = "Lato",
+                                  hjust = 0.5,
+                                  margin = margin(b = 5)),
+        plot.subtitle = element_text(size = 24, 
+                                  family = "Lato",
+                                  hjust = 0.5,
+                                  margin = margin(b = 15)),
+        plot.caption = element_text(size = 9, 
+                                    family = "Lato",
+                                    margin = margin(t = 20)),
+        plot.margin = margin(10, 10, 10, 10))
+
+ggsave("Earthquakes.png", width = 30, height = 17, units = "cm")
+```
+

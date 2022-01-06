@@ -113,5 +113,5 @@ map_pohang +
                                     color = "gary60",
                                     margin = margin(t = 20, b = 5)))
 
-ggsave(here::here("2021", "8.Blue", "PohangRivers.png"), width = 20, height = 16, units = "cm")
+ggsave("Pohang_Rivers.png")
 ```

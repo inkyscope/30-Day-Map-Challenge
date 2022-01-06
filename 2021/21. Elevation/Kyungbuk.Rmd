@@ -1,0 +1,63 @@
+---
+title: "Untitled"
+author: "Sung Inkyung"
+date: '2022 1 6'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#remotes::install_github("wmgeolab/rgeoboundaries")
+library(tidyverse)
+library(elevatr)
+library(rgeoboundaries)
+library(raster)
+library(rayshader)
+library(MetBrewer)
+library(showtext)
+
+font_add_google(c("Abel", "Lato"))
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
+```
+
+
+```{r}
+korea <- gb_adm1("korea")
+
+kb <- korea %>% 
+  filter(shapeName == "Gyeongsangbuk-do")
+
+elev <- get_elev_raster(locations = kb, z = 9, 
+                        clip = "locations")
+
+cropped_elev <- crop(elev, kb)
+cropped_aggr <- raster::aggregate(cropped_elev, fact = 5, fun = "mean")
+
+elev_df <- as.data.frame(cropped_aggr, xy = TRUE) %>% 
+  rename(elevation = 3)
+
+plot_kb<- ggplot(elev_df) +
+  geom_sf(data = kb, color = NA, fill = NA) +
+  geom_tile(aes(x, y, fill = elevation)) +
+  scale_fill_gradientn(colors = met.brewer("Stevens")) +
+  labs(title = "Gyeongsangbuk-do, Korea") +
+  theme_void() +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 24, 
+                                  hjust = 0.5,
+                                  family = "Abel"))
+
+
+ggsave("Gyeongsangbuk-do.png")
+```
+```{r do not run not working}
+plot_gg(plot_kb, width = 5, height = 4, scale = 300, 
+        raytrace = FALSE, windowsize = c(1200, 960),
+        fov = 70, zoom = 0.4, theta = 330, phi = 20,  
+        max_error = 0.01, verbose = TRUE)
+```
+
