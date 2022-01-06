@@ -1,0 +1,71 @@
+---
+title: "Untitled"
+author: "Sung Inkyung"
+date: '2022 1 6'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Source[30DayMapChallenge by @geokaramanis](https://github.com/gkaramanis/30DayMapChallenge/blob/main/2021/27-heatmap/27-heatmap-restaurants.R)
+```{r}
+library(tidyverse)
+library(osmdata)
+library(osmextract)
+library(MetBrewer)
+library(showtext)
+
+font_add_google("Roboto", "roboto")
+
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
+```
+
+
+```{r}
+ind <- rgeoboundaries::gb_adm0("indonesia")
+
+ind_restaurants <- oe_get(
+  "Indonesia",
+  layer = "points",
+  query = "
+  SELECT *, hstore_get_value(other_tags, 'amenity') AS amenity
+  FROM points
+  WHERE amenity = 'restaurant'
+  "
+)
+
+df_ind <- sfheaders::sf_to_df(ind_restaurants, fill = T)
+
+plot <- ggplot(df_ind) +
+  stat_density2d(aes(x, y, fill = ..density..), geom = "tile", contour = FALSE, n = 250) +
+  geom_sf(data = ind, fill = NA, color = "#dba879", size = 0.1) +
+  scale_fill_viridis_c() +
+  labs(fill = "Density of\nrestaurants") +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, size = 6, color = "black", fill = NA) +
+  annotate("text",
+           140, 2.9, 
+           label = "Restaurants\nin\nIndonesia", 
+           family = "roboto", fontface = "bold", size = 10, color = "gray97", hjust = 1, lineheight = 0.85) +
+  annotate("text",
+           140, -0.8,
+           label = "Source: OpenStreetMap\nGraphic: Sung Inkyung",
+           family = "roboto", size = 4, color = "gray97", hjust = 1, lineheight = 0.95) +
+  coord_sf(expand = F) +
+  theme_void() +
+  theme(
+    legend.position = c(0.08, 0.25),
+    legend.title = element_text(family = "roboto",
+                                color = "gray97"),
+    legend.text = element_text(family = "roboto", 
+                                color = "gray97"),
+    plot.background = element_rect(fill = "#40e0d0", 
+                                   color = NA),
+    panel.background = element_rect(fill = "#40e0d0", 
+                                   color = NA)
+  )
+
+ggsave("Resturants.png", width = 28, height = 22, units = "cm")
+```
+
