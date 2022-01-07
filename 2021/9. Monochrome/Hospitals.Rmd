@@ -1,0 +1,73 @@
+---
+title: "9. Monochrome"
+author: "Sung Inkyung"
+date: '2022 1 7'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggforce)
+library(osmdata)
+library(osmextract)
+library(MetBrewer)
+library(showtext)
+
+font_add_google("Saira")
+font_add_google("Fira Sans Condensed", "fira")
+
+showtext_opts(dpi = 300)
+showtext_auto(enable = TRUE)
+```
+
+
+```{r}
+ind <- rgeoboundaries::gb_adm0("indonesia")
+
+ind_hospitals <- oe_get(
+  "Indonesia",
+  layer = "points",
+  query = "
+  SELECT *, hstore_get_value(other_tags, 'amenity') AS amenity
+  FROM points
+  WHERE amenity = 'hospital'
+  "
+)
+
+df_ind <- sfheaders::sf_to_df(ind_hospitals, 
+                              fill = T)
+```
+
+
+```{r}
+
+plot <- ggplot(df_ind) +
+  geom_sf(data = ind, fill = "black", color = NA) +
+  geom_delaunay_segment(aes(x = x, y = y), color = "white", size = 0.1) +
+  labs(title = "Hospitals in Indonesia",
+       caption = "Source: Open Street Map | Graphic: Sung Inkyung") +
+  coord_sf(expand = F) +
+  theme_void() +
+  theme(
+    legend.position = "none",
+    plot.background = element_rect(fill = "white", 
+                                   color = NA),
+    panel.background = element_rect(fill = "white", 
+                                   color = NA),
+    plot.title = element_text(size = 24, 
+                                  family = "Saira",
+                                  hjust = 0.5,
+                                  margin = margin(b = 5)),
+    plot.caption = element_text(size = 9, 
+                               family = "fira",
+                               margin = margin(t = 15)),
+    plot.margin = margin(10, 10, 10, 10))
+
+ggsave("Hospitals.png")
+
+```
+
