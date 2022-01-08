@@ -1,0 +1,29 @@
+---
+title: "17. Land"
+author: "Sung Inkyung"
+date: '2022 1 8'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#devtools::install_github("h-a-graham/rayvista", dependencies=TRUE)
+
+library(rayshader) 
+library(rayvista)
+library(rayrender)
+
+
+attu <- plot_3d_vista(lat = 52.8763, long = 172.8905, 
+                      zscale = 5, zoom = 0.5,
+                      overlay_detail = 14, 
+                      theta = -65, 
+                      windowsize = 1000, 
+                      phi = 25)
+
+
+render_snapshot("Attu_Alaska.png", clear = TRUE)
+```
