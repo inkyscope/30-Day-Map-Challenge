@@ -8,7 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+### Source[rayvista package](https://github.com/h-a-graham/rayvista)
+### Source[jet propulsion Laboratory NASA](https://photojournal.jpl.nasa.gov/mission/Terra?start=600)
 ```{r}
 #devtools::install_github("h-a-graham/rayvista", dependencies=TRUE)
 
