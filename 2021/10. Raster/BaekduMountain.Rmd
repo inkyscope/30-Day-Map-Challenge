@@ -1,0 +1,55 @@
+---
+title: "BaekDu Mountain"
+author: "Sung Inkyung"
+date: '2022 1 8'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(terra)
+library(tmap)
+library(showtext)
+
+font_add_google("Staatliches", "staatliches")
+font_add_google("Roboto", "roboto")
+
+showtext_opts(dpi = 320)
+showtext_auto(enable = TRUE)
+```
+
+
+```{r}
+baekdusan <- rast("PIA18507.tif")
+```
+
+
+```{r}
+map <- tm_shape(baekdusan) +
+  tm_rgb(r =1, g = 2, b = 3) +
+  tm_layout(
+    sepia.intensity = 0.7,
+    saturation = 0.2,
+    frame = T,
+    main.title = "Topology of BaekDu Mountain",
+    main.title.fontfamily = "staatliches",
+    main.title.size = 3.1,
+    main.title.position = "center",
+    title = "Source: photojournal.jpl.nasa.gov\nGrphic: Sung Inkyung",
+    title.position = c("left", "bottom"),
+    title.size = 0.8,
+    title.fontfamily = "roboto",
+    title.color = "gray87",
+    bg.color = "gray97",
+    frame.double.line = T,
+    frame.lwd = 2
+  ) +
+  tm_compass(position = c("right", "top"), 
+             type = "8star", size = 1.7)
+
+tmap_save(map, filename = "Baekdusan.png")
+```
+
