@@ -7,3 +7,27 @@
   
 </p>
   
+# Favorites
+### 1. Points
+![TelAviv](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/1.%20Points/TelAviv.png)
+
+### 3. Polygons
+![Survivor TV Show](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/3.%20Polygons/SurvivorTVShow.png)
+
+### 9. Monochrome
+![Indonesia](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/9.%20Monochrome/Hospitals.png)
+
+### 10. Raster
+![Baekdusan](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/10.%20Raster/Baekdusan.png)
+
+### 17. Land
+![Attu Alaska](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/17.%20Land/Attu_Alaska.png)
+
+### 22. Bounaries
+![Earthquakes](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/22.%20Boundaries/Earthquakes.png)
+
+### 26. Choropleth map
+![Pumpkins](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/26.%20Choropleth%20Map/GiantPumpkins.png)
+
+### 27. Heatmap
+![Ramen Rating](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/27.%20Heatmap/RamenRatings.png)
