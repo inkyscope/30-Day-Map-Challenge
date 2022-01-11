@@ -1,0 +1,115 @@
+---
+title: "1. Points"
+author: "Sung Inkyung"
+date: '2022 1 8'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggrepel)
+library(ggtext)
+library(MetBrewer)
+library(countrycode)
+library(ggmap)
+library(sf)
+library(rayshader)
+library(showtext)
+
+font_add_google("Julius Sans One", "julius")
+
+showtext_opts(dpi = 320)
+showtext_auto(enable = TRUE)                                  
+```
+
+### Source[World economic Forum](https://www.weforum.org/agenda/2021/12/tel-aviv-most-expensive-city-index/)
+
+```{r}
+Top10_Cities <- c("Tel Aviv-Yafo", "Paris", "Singapore", "Zurich", "Hong Kong", "New York", "Geneva", "Copenhagen", "Los Angeles", "Osaka")
+
+world <- map_data("world")
+
+cities <- maps::world.cities %>% 
+  select(city = name, 
+         country = country.etc,
+         lat, long) 
+
+hk <- tribble(
+  ~city, ~country, ~lat, ~long, ~ index,
+  "Hong Kong", "China", 22.32, 114.17, 101
+)
+
+df_cities <- cities %>% 
+  filter(city %in% Top10_Cities) %>% 
+  filter(!country%in% c("Chile", "Canada")) %>% 
+  mutate(index = case_when(city == "Tel Aviv-Yafo" ~ 106,
+                          city == "Paris" ~ 104,
+                          city == "Singapore" ~ 104,
+                          city == "Zurich" ~ 103,
+                          city == "New York" ~ 100,
+                          city == "Geneva" ~ 99,
+                          city == "Copenhagen" ~ 97,
+                          city == "Los Angeles" ~ 96,
+                          city == "Osaka" ~ 94))
+
+df <- rbind(df_cities, hk)
+
+```
+
+
+```{r}
+pals <- met.brewer("Redon", n = 10, type = "discrete")
+
+plot <- ggplot() +
+  geom_map(data = world, map = world,
+           aes(long,  lat, map_id = region),
+           color = "#c5d2d3", fill = "#a2c4c9", size = 0.1) +
+  geom_point(data = df,
+             aes(long, lat, 
+                 color = city, size = index),
+             alpha = 0.8
+             ) +
+  geom_text_repel(data = df,
+                  aes(long, lat, label = city),
+                  family = "julius",
+                  size = 3.5,
+                  hjust = - 0.2,
+                  vjust = 0.5) +
+  scale_color_manual(values = pals,
+                     guide = "none") +
+  guides(size = guide_legend(nrow = 1,
+                            direction = "horizontal",
+                            title = "Cost living  2021 index",
+                            ticks.colour = "grey20",
+                            title.position = "top",
+                            label.position = "top",
+                            title.hjust = 0.5)) +
+  scale_size(range = c(0.25, 5)) +
+  labs(title = "The 10 World's Most Expensive Cities",
+       subtitle = "<span style = 'color:#732f30'>**Tel Aviv**</span> has the highest cost living in the world",
+       caption = "Source: World Economic Forum  | Graphic: Sung Inkyung") +
+  theme_void() +
+  theme(legend.position = "bottom",
+        plot.background = element_rect(fill = "#c5d2d3",
+                                       color = NA),
+        plot.title = element_text(size = 24, 
+                                  family = "julius",
+                                  hjust = 0.5),
+        plot.subtitle = element_markdown(size = 16, 
+                                         family = "julius",
+                                         hjust = 0.5),
+        plot.caption = element_text(size = 7, 
+                                  family = "julius",
+                                  hjust = 1,
+                                  margin = margin(t = 15)),
+        plot.margin = margin(10, 10, 10, 10))
+
+ggsave("TelAviv.png", width = 26, height = 16, units = "cm")
+```
+
+### need to work on 3D with rayshader
+

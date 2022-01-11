@@ -1,5 +1,5 @@
 ---
-title: "Volcanoe Eruptions"
+title: "11. 3D"
 author: "Sung Inkyung"
 date: '2021 2 6'
 output: html_document
@@ -15,6 +15,14 @@ library(maps)
 library(ggridges)
 library(viridis)
 library(patchwork)
+library(showtext)
+
+font_add_google("Saira")
+font_add_google("Fira Sans Condensed")
+font_add_google("Jost")
+
+showtext_opts(dpi = 320)
+showtext_auto(enable = TRUE)
 ```
 
 ```{r}
@@ -59,15 +67,18 @@ plot_world <- df_map %>%
         panel.background = element_rect(fill = "#8ac5d2",
                                         color = NA),
         plot.title = element_markdown(size = 16,
+                                      family = "Saira",
                                       margin = margin(b = 7)),
         plot.caption = element_text(size = 7,
+                                    family = "Saira",
                                     color = "#9389a3"))
 ```
 
 
 ```{r}
 ini_vol <- volcano %>% 
-  filter(country == "Indonesia")
+  filter(country == "Indonesia") %>% 
+  filter(!subregion %in% c("Krakatau", "Banda Sea"))
 
 p1 <- ggplot() +
   geom_density_ridges_gradient(data = ini_vol,
@@ -77,12 +88,17 @@ p1 <- ggplot() +
   scale_fill_viridis_c(option = "magma",
                        alpha = .7,
                        direction = 1) +
+  scale_x_continuous(expand = c(0, 0)) +
   theme_minimal() +
   theme(legend.position = "none",
         panel.grid = element_blank(),
         axis.title.y = element_blank(),
-        axis.title.x = element_blank())
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10,
+                                  family = "Jost"))
 ```
+
 ```{r}
 map_ini <- map_data("world", region = "Indonesia")
 
@@ -96,36 +112,52 @@ p2 <- ggplot() +
              aes(longitude, latitude,
                  color = elevation)) +
   scale_color_viridis_c(option = "magma",
-                        direction = 1,
-                        guide = "colorbar") +
+                        direction = 1) +
+  guides(color = guide_colorbar(barheight = .5, 
+                               barwidth = 9,
+                               direction = "horizontal",
+                               title = "Elevation",
+                               ticks.colour = "grey20",
+                               title.position = "top",
+                               label.position = "top",
+                               title.hjust = 0.5)) +
   labs(x = "longitude",
        y = "latitude") +
   annotate("text",
            x = 101.2,
            y = -2.5,
-           label = "Sumatra") +
+           label = "Sumatra",
+           family = "Jost") +
   annotate("text",
            x = 123,
            y = -9,
-           label = "Lesser Sunda Islands") +
+           label = "Lesser Sunda Islands",
+           family = "Jost") +
   annotate("text",
            x = 113,
            y = -8.1,
-           label = "Java") +
+           label = "Java",
+           family = "Jost") +
   annotate("text",
            x = 127.4,
            y = 0.65,
-           label = "Halmahera") +
+           label = "Halmahera",
+           family = "Jost") +
   annotate("text",
            x = 130,
            y = -6.7,
-           label = "Banda Sea") +
+           label = "Banda Sea",
+           family = "Jost") +
   annotate("text",
            x = 105.4,
            y = -7,
            label = "Karakatau") +
   theme_void()+
-  theme(legend.position = "bottom")
+  theme(legend.position = c(-.5, 0.1),
+        legend.justification = c("left", "bottom"),
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 7))
+p2
 ```
 
 ```{r}
@@ -137,9 +169,10 @@ ini_vol %>%
   count(last_eruption_year, sort = T) %>% 
   arrange(last_eruption_year)
 ```
+
 ```{r}
 layout <- c(area(.5, .5, 5, 5),
-            area(3, 3, 10, 10))
+            area(3, 3, 15, 15))
 ```
 
 
@@ -150,15 +183,19 @@ p1 + p2 +
     title = "Volcanoes in Indonesia",
     subtitle = "Elevations of 95 volcanoes acorss 7 subregions in Indonesia\nEach subregion is marked with the highest elevation",
     caption = "Source: Smithsonian | Graphic: Sung Inkyung"
-  )
+  ) &
+  theme(plot.title = element_text(size = 20,
+                                  family = "Saira",
+                                  margin = margin(b = 7)),
+        plot.subtitle = element_text(size = 11,
+                                     lineheight = 0.9,
+                                     family = "Fira Sans Condensed",
+                                     margin = margin(b = 15)),
+        plot.caption = element_text(size = 7,
+                                    family = "Fira Sans Condensed"),
+        plot.margin = margin(10, 10, 10, 10))
 
-ggsave(filename = "volcanoeEruptions_Indonesia.png", width = 21, height = 13, units = "cm")
+ggsave("volcanoeEruptions_Indonesia.png", width = 21, height = 13, units = "cm")
 ```
 
-
-```{r}
-ini_vol %>% 
-  group_by(region) %>% 
-  count(subregion, sort = T)
-```
 
