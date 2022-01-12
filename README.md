@@ -19,7 +19,7 @@
 ### 10. Raster
 ![Baekdusan](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/10.%20Raster/Baekdusan.png)
 
-### 17. Land
+### 17. Land(Attu, Alaska)
 ![Attu Alaska](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/17.%20Land/Attu_Alaska.png)
 
 ### 22. Bounaries
