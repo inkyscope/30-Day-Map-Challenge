@@ -37,7 +37,10 @@ longs <- data.frame(
   l = seq(-180, 180, 90)
 ) %>% 
   mutate(la = 1 * pi/180)
+```
 
+
+```{r replicate plot by @gkaramanis}
 ggplot(centroids) +
   geom_segment(aes(x = cos(a), xend = 0.999 * d * cos(a),
                    y = sin(a), yend = 0.999 * d * sin(a)),
@@ -75,5 +78,5 @@ ggplot(centroids) +
 
 ggsave("Indonesia.png", width = 26, height = 27, units = "cm")
 
-### This plot is my favorite one among all the contributions to #30DayMapChallenge. 
+### This plot is my favorite one among all the contributions to #30DayMapChallenge. The only change I made is fonts.
 ```
