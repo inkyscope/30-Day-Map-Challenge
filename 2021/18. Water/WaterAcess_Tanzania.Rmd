@@ -1,0 +1,121 @@
+---
+title: "Water Sources in Tanzania"
+author: "Sung Inkyung"
+date: '2022 1 11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(ggmap)
+library(countrycode)
+library(showtext)
+
+font_add_google("Cairo")
+font_add_google("IBM Plex Sans")
+font_add_google("PT Sans Narrow")
+
+showtext_opts(dpi = 320)
+showtext_auto()
+```
+
+
+```{r}
+water <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-04/water.csv') %>% 
+  select(row_id, country = country_name, source = water_source, lat = lat_deg, lon = lon_deg)
+  
+```
+
+
+```{r}
+df <- water %>% 
+  filter(!is.na(country),
+         !is.na(source)) %>% 
+  mutate(source = case_when(
+    str_detect(source, "Protected") ~ "Protected Water",
+    str_detect(source, "Unprotected") ~"Unprotected Water",
+    str_detect(source, "Undefined") ~ "Undefined",
+    str_detect(source, "Delivered") ~ "Delivered / Packaged Water",
+    str_detect(source, "Packaged") ~ "Delivered / Packaged Water",
+    str_detect(source, "Surface") ~ "Surface Water",
+    str_detect(source, "surface") ~ "Surface Water",
+    TRUE ~ source
+  )) %>% 
+  filter(source %in% c("Borehole", "Protected Water", "Rainwater Harvesting", "Surface Water", "Undefined"))
+
+water_sources <- df %>% 
+  count(country, source) %>% 
+  group_by(country) %>% 
+  mutate(prc = n / sum(n),
+         prc = round(prc, 2)) %>% 
+  ungroup() %>% 
+  arrange(desc(prc)) %>% 
+  filter(prc > 0) %>% 
+  filter(country == "Tanzania") %>% 
+  distinct(source)
+
+df %>% 
+  filter(country == "Tanzania") %>% 
+  select(source, prc)
+
+```
+
+```{r}
+africa <- map_data("world") %>% 
+  as_tibble() %>% 
+  mutate(continent = countrycode(region, "country.name", "continent")) %>% 
+  filter(continent == "Africa") 
+
+
+bbox = c(left = 27, bottom = -12, right = 43, top = -0.7)
+
+pals <- c("Undefined" = "#9f1d35",
+          "Surface Water" = "#420699",
+          "Rainwater Harvesting" = "#fdbe02",
+          "Borehole" = "#b0b0b0", 
+          "Protected Water" = "#8cddfc")
+```
+
+
+```{r}
+map_tanzania <- ggmap(get_stamenmap(bbox, 
+                                   maptype = "toner-hybrid",
+                                   zoom = 7, crop = T),
+                       extent = "device") +
+  geom_point(data = df %>% 
+               filter(country == "Tanzania"),
+             aes(lon, lat, color = source), alpha = 0.4, size = 0.3) +
+  scale_color_manual(values = pals,
+                     name = "Water sources") +
+  guides(color = guide_legend(override.aes = list(size = 4),
+                              nrow = 2)) +
+  labs(title = "T A N Z A N I A\nWATER ACESS SOURCES\nTO BE DEVELOPED",
+       caption = "Scource: Water Point Data Exchange WPDx | Graphic: Sung Inkyung") +
+  borders(regions = "Tanzania") +
+  theme_void() +
+  theme(legend.position = "bottom",
+        legend.title = element_text(family = "IBM Plex Sans",
+                                    size = 9),
+        legend.text = element_text(family = "IBM Plex Sans",
+                                   size = 7),
+        plot.background = element_blank(),
+    plot.title = element_text(color = "#077ccc",
+                              family = "Cairo",
+                              size = 16,
+                              hjust = 0.5, 
+                              lineheight = 0.9,
+                              margin = margin(t = 5, b = 10)),
+    plot.caption = element_text(color = "gray55",
+                                family = "PT Sans Narrow",
+                                size = 7, 
+                                hjust = 0.78, 
+                                margin = margin(t = 10)))
+
+ggsave("WaterAcess_Tanzania.png", width = 15, height = 15, units ="cm")
+```
+
