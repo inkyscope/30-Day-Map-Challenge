@@ -1,5 +1,5 @@
 ---
-title: "28. The Earth is not flat"
+title: "28.The Earth is not flat"
 author: "Sung Inkyung"
 date: '2022 1 14'
 output: html_document
@@ -24,8 +24,6 @@ showtext_auto()
 
 ```{r replicate plot by @gkaramanis}
 centroids <- read_csv("data/country_centroids.csv") %>%
-  mutate(latitude = parse_number(latitude),
-         longitude = parse_number(longitude)) %>% 
   mutate(
     a = longitude * pi/180,
     d = ifelse(country == "ID", 2, 1.3),
@@ -57,7 +55,7 @@ ggplot(centroids) +
             aes(x = 0.85 * cos(la), y = 0.85 * sin(la),
                 label = ifelse(l == -180,  "±180", l)),
             check_overlap = TRUE, 
-            family = "Orbitron",
+            family = "Montserrat Alternates",
             size = 3.5) +
   annotate("text",
            0, 0,
@@ -68,15 +66,16 @@ ggplot(centroids) +
   scale_color_identity() +
   coord_fixed(xlim = c(-2, 2), ylim = c(-2, 2),
               clip = "off") +
-  labs(caption = "Source: Longitude of coutnry centroids | Credit: @gkaramanis") +
+  labs(caption = "Source: Longitude of country centroids | Credit: @gkaramanis") +
   theme_void() +
-  theme(plot.background = element_rect(fill = "gray98",
+  theme(plot.background = element_rect(fill = "gray97",
                                        color = NA),
-        plot.caption = element_text(family = "Montserrat Alternates",
+        plot.caption = element_text(family = "Orbitron",
                                     hjust = 0.5),
         plot.margin = margin(20, 20, 20, 20))
 
 ggsave("Indonesia.png", width = 26, height = 27, units = "cm")
 
-### This plot is my favorite one among all the contributions to #30DayMapChallenge. The only change I made is fonts.
+### This plot is my favorite one among all the contributions to #30DayMapChallenge. The changes I made is typeface and cleaning up data.
 ```
+
