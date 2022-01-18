@@ -1,0 +1,112 @@
+---
+title: "17.Land"
+author: "Sung Inkyung"
+date: '2022 1 18'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(ggtext)
+library(rnaturalearth)
+library(sf)
+library(raster)
+library(ggvoronoi)
+library(MetBrewer)
+library(patchwork)
+library(showtext)
+
+font_add_google("Nova Square")
+font_add_google("Assistant")
+
+showtext_opts(dpi = 320)
+showtext_auto()
+
+```
+
+
+```{r}
+crops <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-01-19/crops.csv')
+
+df_kenya <- crops %>% 
+  filter(SubCounty != "KENYA") %>% 
+  dplyr::select(-Farming) %>% 
+  rename(county = SubCounty,
+         Cashew = 'Cashew Nut',
+         Miraa = 'Khat (Miraa)') %>% 
+  mutate(county = str_to_title(county)) %>% 
+  pivot_longer(cols = c(Tea:Miraa),
+               names_to = "type") %>% 
+  mutate_all(~replace(., is.na(.), 0))
+
+df_prc <- df_kenya %>% 
+  group_by(county) %>% 
+  mutate(total = sum(value),
+         prc = value / total) %>% 
+  mutate(prc = round(prc, 2)) %>% 
+  ungroup() %>% 
+  filter(prc >= .5)
+
+```
+
+
+```{r}
+africa <- ne_countries(continent = "Africa")
+africa_sf <- st_as_sf(africa)
+
+kenya <- raster::getData("GADM", country = "KEN", level = 1)
+crs(kenya) <- crs(africa)
+kenya_sf <- st_as_sf(kenya)
+
+df_plot <- kenya_sf %>% 
+  left_join(df_prc, by = c("NAME_1" = "county")) %>% 
+  filter(!is.na(NAME_1))
+
+```
+
+```{r}
+pal_kenya <- ifelse(africa_sf$sovereignt == "Kenya", "#bb0000", "#000000")
+
+plot_kenya <- africa_sf %>% 
+  ggplot() +
+  geom_sf(fill = pal_kenya, color = "gray70") +
+  theme_void()
+```
+
+
+```{r}
+plot_crops <- df_plot %>% 
+  ggplot() +
+  geom_sf(aes(fill = type)) +
+  scale_fill_manual(values = c("Avocado" = "#568203",
+                               "Coconut" = "#965a3e",
+                               "Mango" = "#ff8243"),
+                    guide = "none") +
+  theme_void()
+
+patchwork <- plot_crops + inset_element(plot_kenya,
+                                        left = -0.2, 
+                                        bottom = 0.4, right = 0.1, top = 1, align_to = 'full')
+
+plot_final <- patchwork +
+  plot_annotation(title = "Top 3 Crops in <span style = 'color:#bb0000'>**Kenya**</span>",
+       subtitle = "<span style = 'color:#568203'>**Avocado**</span>, <span style = 'color:#965a3e'>**Coconut**</span>, <span style = 'color:#ff8243'>**Mango**</span>",
+       caption = "Source: rKenyaCensus | Graphic: Sung Inkyung") &
+  theme_void() +
+  theme(plot.title = element_markdown(family = "Nova Square",
+                                      size = 24,
+                                      hjust = 0.5),
+        plot.subtitle = element_markdown(family = "Assistant",
+                                         size = 18,
+                                         hjust = 0.5),
+        plot.caption = element_text(family = "Assistant",
+                                    size = 9,
+                                    hjust = 0.5))
+
+ggsave("Crops_Kenya.png")
+```
+
