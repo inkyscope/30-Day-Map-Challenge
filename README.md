@@ -23,7 +23,7 @@
 ![Kenya](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/17.%20Land/Crops_Kenya.png)
 
 ### 21. Elevation(Attu, Alaska)
-![Attu Alaska](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/21.%20Land/Attu_Alaska.png)
+![Attu Alaska](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/21.%20Elevation/Attu_Alaska.png)
 
 ### 22. Bounaries
 ![Earthquakes](https://github.com/inkyscope/30-Day-Map-Challenge/blob/main/2021/22.%20Boundaries/Earthquakes.png)
