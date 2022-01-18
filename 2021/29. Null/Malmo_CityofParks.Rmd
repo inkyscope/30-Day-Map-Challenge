@@ -1,7 +1,7 @@
 ---
 title: "day29.Null"
 author: "Sung Inkyung"
-date: '2022 1 18 '
+date: '2022 1 18'
 output: html_document
 ---
 
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(imager)
 ```
-
+### This is a map I brought from 2002 while I was in Malmo, Sweden.
 
 ```{r}
 img <- load.image("Malmo.PNG") 
