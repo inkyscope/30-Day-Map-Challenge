@@ -1,5 +1,5 @@
 ---
-title: "day29.Null"
+title: "day15 Map without using computer"
 author: "Sung Inkyung"
 date: '2022 1 18'
 output: html_document
@@ -12,9 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(imager)
 ```
-### This is a map I brought from 2002 while I was in Malmo, Sweden.
+### This is a map I brought from 2002 while I was in Malmo, Sweden in 2002.
 
 ```{r}
 img <- load.image("Malmo.PNG") 
-imager::save.image(img, "Malmo_CityofParks.png")
+imager::save.image(img, "Malmo_Handpaintedmap.png")
 ```
