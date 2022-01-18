@@ -1,0 +1,20 @@
+---
+title: "day29.Null"
+author: "Sung Inkyung"
+date: '2022 1 18 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(imager)
+```
+
+
+```{r}
+img <- load.image("Malmo.PNG") 
+imager::save.image(img, "Malmo_CityofParks.png")
+```
