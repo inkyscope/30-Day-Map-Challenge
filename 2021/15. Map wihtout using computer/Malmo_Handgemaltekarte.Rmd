@@ -16,5 +16,5 @@ library(imager)
 
 ```{r}
 img <- load.image("Malmo.PNG") 
-imager::save.image(img, "Malmo_Handpaintedmap.png")
+imager::save.image(img, "Malmo_Handgemaltekarte.png")
 ```

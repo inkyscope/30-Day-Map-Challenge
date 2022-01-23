@@ -1,0 +1,77 @@
+---
+title: "30. Metamapping Day"
+author: "Sung Inkyung"
+date: '2022 1 23'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### Source[30DayMapChallenge by @geokaramanis](https://github.com/gkaramanis/tidytuesday/blob/master/2021/2021-week44/map.R)
+```{r}
+library(tidyverse)
+library(spData)
+library(sf)
+library(ggfx)
+library(showtext)
+
+font_add_google("Jost")
+showtext_opts(dpi = 320)
+showtext_auto()
+
+```
+
+
+```{r}
+lat <- 35
+lon <- 100
+ortho <- paste0('+proj=ortho +lat_0=', lat, ' +lon_0=', lon,
+                ' +x_0=0 +y_0=0 +a=6371000 +b=6371000 +units=m +no_defs')
+
+circle <- st_point(x = c(0, 0)) %>% 
+  st_buffer(dist = 6371000) %>% 
+  st_sfc(crs = ortho) %>% 
+  st_transform(crs = 4326)
+
+world_ortho <- st_cast(world, "MULTIPOLYGON") %>% 
+  st_cast('POLYGON', do_split = TRUE) %>% 
+  st_transform(crs = ortho)
+```
+
+
+```{r}
+ggplot(world_ortho) +
+  with_blur(
+    geom_sf(data = circle, 
+            fill = "cadetblue4", color = NA,
+            size = 2),
+    sigma = unit(3, 'mm') 
+  ) +
+  geom_sf(data = circle,
+          fill = "cadetblue3", color = "black", size = 0.3) +
+  geom_sf(aes(fill = lifeExp), size = 0.2, 
+          color = "#06216e") +
+  scale_fill_fermenter(palette = "Accent", na.value = "#8c7d70") +
+  labs(caption = "Data: spData package | Graphic: Sung Inkyung\nCredit: Georgios Karamanis") +
+  guides(fill = guide_colorbar(title = "Life Expectancy (Years)",
+                               title.position = "top", title.hjust = 0.5)) +
+  theme_void(base_family = "Jost",
+             base_size = 15) +
+  theme(legend.position = "top",
+        legend.title = element_text(color = "cornsilk2", size = 12),
+        legend.text = element_text(color = "cornsilk1"),
+        legend.key.height = unit(0.5, "line"),
+        legend.key.width = unit(3, "line"),
+        plot.background = element_rect(fill = "deepskyblue4", 
+                                       color = NA),
+        plot.title = element_text(color = "cornsilk2",
+                                  size = 24),
+        plot.caption = element_text(color = "cornsilk3",
+                                    size = 9),
+        plot.margin = margin(20, 20, 20, 20)
+        )
+
+ggsave("LifeExpectancy.png", width = 21, height = 24, units = "cm")
+```
+
